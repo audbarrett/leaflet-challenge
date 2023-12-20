@@ -28,6 +28,29 @@ function createMap(earthquakeFeatures) {
         collapsed: false
     }).addTo(map);
 
+    // create legend 
+    let legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+    // create new div to hold legend
+    let div = L.DomUtil.create('div', 'info legend'),
+        // create array of depth intervals
+        grades = [-10, 10, 30, 50, 70, 90],
+        labels = [];
+
+    // loop through our depth intervals and generate a label with a colored square for each interval
+    for (let i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+
+// add legend to map
+legend.addTo(map);
+
 }
 
 // create getColor function
@@ -62,7 +85,7 @@ function createMarkers(response) {
             weight: 1,
             radius: earthquake.properties.mag * 15000
         })
-        .bindPopup("<h3>" + earthquake.properties.mag + "</h3>")
+        .bindPopup("<h3>" + earthquake.properties.place + "<hr>" + "<h3><h3>Magnitude: " + earthquake.properties.mag + "<h3><h3>Depth: " + earthquake.geometry.coordinates[2] + "</h3>")
 
     // Add the marker to the earthquakeMarkers array
         earthquakeMarkers.push(earthquakeMarker);
@@ -73,26 +96,3 @@ function createMarkers(response) {
 }
 // Perform an API call to the USGS API to get the earthquake information. Call createMarkers when it completes.
 d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson").then(createMarkers);
-
-// create legend 
-let legend = L.control({position: 'bottomright'});
-
-legend.onAdd = function (map) {
-    // create new div to hold legend
-    let div = L.DomUtil.create('div', 'info legend'),
-        // create array of depth intervals
-        grades = [-10, 10, 30, 50, 70, 90],
-        labels = [];
-
-    // loop through our depth intervals and generate a label with a colored square for each interval
-    for (let i = 0; i < grades.length; i++) {
-        div.innerHTML +=
-            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
-    }
-
-    return div;
-};
-
-// add legend to map
-legend.addTo(map);
